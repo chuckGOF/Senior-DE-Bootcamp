@@ -11,6 +11,9 @@ from week1_basics.src.extract import extract
 from week1_basics.src.transform import transform
 from week1_basics.src.load import load
 
+# Base directory
+BASE_DIR = Path(__file__).parent.parent
+
 
 # logging.basicConfig(level=settings.log_level)
 # Logger
@@ -31,9 +34,8 @@ def run():
         # logging.info("Starting ETL job")
         logger.info("Starting ETL job")
 
-        basedir = Path(__file__).parent.parent
-        input_path = Path(basedir / settings.input_path)
-        output_path = Path(basedir / settings.output_path)
+        input_path = Path(BASE_DIR / settings.input_path)
+        output_path = Path(BASE_DIR / settings.output_path)
 
         df = extract(input_path)
         df = transform(df)
