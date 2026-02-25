@@ -1,0 +1,4 @@
+polars
+pytest
+pydantic
+pydantic-settings
