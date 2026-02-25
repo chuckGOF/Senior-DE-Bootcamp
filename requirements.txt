@@ -2,3 +2,8 @@ polars
 pytest
 pydantic
 pydantic-settings
+pre-commit
+black
+ruff
+python-json-logger
+prometheus-client
