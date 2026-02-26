@@ -17,4 +17,4 @@ ENV PYTHONPATH=/app
 # Expose port
 EXPOSE 8000
 
-CMD ["python", "week1_basics/src/main.py"]
+CMD ["python", "-m", "week2_cdc.src.main"]
