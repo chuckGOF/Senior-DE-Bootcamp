@@ -18,7 +18,7 @@ def read_watermark() -> pd.Timestamp:
 
 # Atomic Write
 def write_watermark_atomic(timestamp: pd.Timestamp) -> None:
-    temp = tempfile.NamedTemporaryFile(delete=False)
+    temp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False)
     json.dump({"last_updated": timestamp.isoformat()}, temp)
     temp.close()
     os.replace(temp.name, settings.WATERMARK_PATH)

@@ -2,17 +2,12 @@
 import time
 import sys
 
-from pathlib import Path
 from prometheus_client import start_http_server, Counter, Histogram
 
-from week1_basics.config import settings
 from week1_basics.logger import get_logger
 from week1_basics.src.extract import extract
 from week1_basics.src.transform import transform
 from week1_basics.src.load import load
-
-# Base directory
-BASE_DIR = Path(__file__).parent.parent
 
 
 # logging.basicConfig(level=settings.log_level)
@@ -34,12 +29,9 @@ def run():
         # logging.info("Starting ETL job")
         logger.info("Starting ETL job")
 
-        input_path = Path(BASE_DIR / settings.input_path)
-        output_path = Path(BASE_DIR / settings.output_path)
-
-        df = extract(input_path)
-        df = transform(df)
-        load(df, output_path)
+        df = extract()
+        transform_df = transform(df)
+        load(transform_df)
 
         duration = time.time() - start_time
         etl_duration.observe(duration)

@@ -1,7 +1,10 @@
-from pathlib import Path
 import polars as pl
-from typing import Union
+from pathlib import Path
+from week1_basics.config import settings
+
+# Base directory
+BASE_DIR = Path(__file__).parent.parent.parent
 
 
-def extract(path: Union[str, Path]) -> pl.DataFrame:
-    return pl.read_csv(path)
+def extract() -> pl.DataFrame:
+    return pl.read_csv(Path(BASE_DIR / settings.input_path))
