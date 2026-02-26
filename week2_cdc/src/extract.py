@@ -8,6 +8,11 @@ from week2_cdc.src.watermark import read_watermark
 BASE_DIR = Path(__file__).parent.parent.parent
 
 
+def extract_new_rows(df: pd.DataFrame, last_watermark: pd.Timestamp) -> pd.DataFrame:
+    """Return only rows updated after the last watermark."""
+    return df[df["updated_at"] > last_watermark]
+
+
 # Late Data Safe
 def extract() -> pd.DataFrame:
     """Full extract function reading CSV and applying watermark."""

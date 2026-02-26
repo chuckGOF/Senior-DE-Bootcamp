@@ -6,6 +6,8 @@ from week1_basics.logger import get_logger
 from week2_cdc.src.extract import extract
 from week2_cdc.src.transform import transform
 from week2_cdc.src.load import load
+from week2_cdc.src.validation import DataValidationError, validate
+
 
 # Base Directory
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -18,6 +20,9 @@ logger = get_logger("cdc_pipeline_prod")
 cdc_runs = Counter("cdc_runs_total", "Total number of CDC runs")
 cdc_failures = Counter("cdc_failures_total", "Total number of CDC failures")
 cdc_duration = Histogram("cdc_duration_seconds", "Time spent running CDC")
+validation_failures = Counter(
+    "cdc_validation_failures_total", "Total number of data validation failures"
+)
 
 
 def run():
@@ -32,6 +37,9 @@ def run():
             logger.info("No new data to process")
             return
 
+        # validate dataframe
+        validate(df)
+
         transformed_df = transform(df)
         load(transformed_df)
 
@@ -43,6 +51,11 @@ def run():
             f"Rows processed: {len(transformed_df)}."
             f"Duration: {duration:.2f}s"
         )
+
+    except DataValidationError:
+        validation_failures.inc()
+        logger.info("Data validation failed")
+        sys.exit(1)
 
     except Exception as _:
         cdc_failures.inc()
