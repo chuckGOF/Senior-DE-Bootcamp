@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  warehouse:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: fabric
+      POSTGRES_PASSWORD: fabric
+      POSTGRES_DB: fabric_dw
+    ports:
+      - "5432:5432"
+
+
+  cdc_endpoint:
+    build: .
+    depends_on:
+      - warehouse
+    environment:
+      DB_HOST: warehouse
+      DB_PORT: 5432
+      DB_USER: fabric
+      DB_PASSWORD: fabric
+      DB_NAME: fabric_dw

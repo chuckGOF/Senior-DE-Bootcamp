@@ -9,3 +9,9 @@ black
 ruff
 python-json-logger
 prometheus-client
+psycopg2
+boto3
+adlfs
+s3fs
+azure-identity
+azure-storage-blob
