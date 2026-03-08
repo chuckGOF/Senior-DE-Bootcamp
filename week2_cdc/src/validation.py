@@ -27,4 +27,3 @@ def validate(df: pd.DataFrame) -> None:
         raise DataValidationError("Timestamp column contains NULL.")
 
 
-x = "asset_id"
