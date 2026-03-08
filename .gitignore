@@ -39,3 +39,4 @@ dmypy.json
 .pyre/
 .pytype/
 .pyre/
+.env

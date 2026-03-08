@@ -19,11 +19,29 @@ def run():
         if df.empty:
             return
 
+        df["updated_date"] = df["updated_at"].dt.date
+        partitions = df["updated_date"].unique()
+
         adls_writer = ADLSWriter()
         s3_writer = S3Writer()
+        adls_staging, s3_staging = [], []
+        for partition in partitions:
+            s1, f1 = adls_writer.write_partition(
+                df[df["updated_date"] == partition], partition
+            )
+            s2, f2 = s3_writer.write_partition(
+                df[df["updated_date"] == partition], partition
+            )
 
-        adls_writer.write(df)
-        s3_writer.write(df)
+            adls_staging.append((s1, f1))
+            s3_staging.append((s2, f2))
+
+        # Promote partitions after all writes succeed
+        for s1, f1 in adls_staging:
+            adls_writer.promote(s1, f1)
+
+        for s2, f2 in s3_staging:
+            s3_writer.promote(s2, f2)
 
         watermark_repo.update(df["updated_at"].max())
         conn.commit()

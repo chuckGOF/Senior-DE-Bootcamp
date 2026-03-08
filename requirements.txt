@@ -13,5 +13,6 @@ psycopg2
 boto3
 adlfs
 s3fs
+sqlalchemy
 azure-identity
 azure-storage-blob
