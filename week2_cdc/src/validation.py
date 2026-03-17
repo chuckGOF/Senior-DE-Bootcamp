@@ -25,5 +25,3 @@ def validate(df: pd.DataFrame) -> None:
     # Timestamp nulls
     if df[settings.TIMESTAMP_COLUMNS].isnull().any():
         raise DataValidationError("Timestamp column contains NULL.")
-
-

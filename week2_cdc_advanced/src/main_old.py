@@ -7,80 +7,71 @@ from week2_cdc_advanced.src.writers.adls_writer import ADLSWriter
 from week2_cdc_advanced.src.writers.s3_writer import S3Writer
 from week2_cdc_advanced.src.cdc.locks import acquire_file_lock
 from week2_cdc_advanced.src.cdc.validator import validate, DataValidationError
-
 # from week2_cdc_advanced.src.cdc.schme_manager import align_schema
 from week2_cdc_advanced.src.warehouse.connection import get_connection
 from week2_cdc_advanced.src.observability.metrics import (
-    cdc_runs,
-    cdc_failures,
-    cdc_duration,
-    validation_failures,
-    cdc_rows_processed_total,
-    cdc_partitions_written_total,
-    cdc_watermark_log_seconds,
+    cdc_runs, 
+    cdc_failures, 
+    cdc_duration, 
+    validation_failures, 
+    cdc_rows_processed_total, 
+    cdc_partitions_written_total, 
+    cdc_watermark_log_seconds
 )
-from week2_cdc_advanced.src.cdc.run_manager import generate_run_id
-
 
 def run():
     start_time = time.time()
-    run_id = generate_run_id()
     cdc_runs.inc()
 
     conn = get_connection()
     watermark_repo = WatermarkRepository(conn, "sales_orders_cdc")
     cdc_watermark_log_seconds.observe(0)  # Log initial watermark read time
 
+
     lock = acquire_file_lock()
 
     try:
         last_wm = watermark_repo.acquire_lock()
-        cdc_watermark_log_seconds.observe(
-            time.time() - start_time
-        )  # Log watermark read time
-
-        adls_fs = []
-        s3_fs = []
-        new_watermark = last_wm
-        adls_writer = ADLSWriter()
-        s3_writer = S3Writer()
+        cdc_watermark_log_seconds.observe(time.time() - start_time)  # Log watermark read time
 
         for chunk in extract_incremental(conn, last_wm):
             if chunk.empty:
                 return
-
+            
             validate(chunk)
 
-            partitions = chunk["updated_at"].dt.date.unique()
+            chunk["updated_date"] = chunk["updated_at"].dt.date
+            partitions = chunk["updated_date"].unique()
 
-            adls_writer.write_chunk(chunk, run_id)
-            s3_writer.write_chunk(chunk, run_id)
+            adls_writer = ADLSWriter()
+            s3_writer = S3Writer()
+            adls_staging, s3_staging = [], []
+            for partition in partitions:
+                s1, f1 = adls_writer.write_partition(
+                    chunk[chunk["updated_date"] == partition], partition
+                )
+                s2, f2 = s3_writer.write_partition(
+                    chunk[chunk["updated_date"] == partition], partition
+                )
 
-            adls_fs.append(adls_writer)
-            s3_fs.append(s3_writer)
+                adls_staging.append((s1, f1))
+                s3_staging.append((s2, f2))
 
             cdc_rows_processed_total.inc(len(chunk))
             cdc_partitions_written_total.inc(len(partitions))
+            
+            # Promote partitions after all writes succeed
+            for s1, f1 in adls_staging:
+                adls_writer.promote(s1, f1)
 
-            new_watermark = (
-                max(new_watermark, chunk["updated_at"].max())
-                if new_watermark
-                else chunk["updated_at"].max()
-            )
-
-        for file in adls_fs:
-            adls_writer.promote_run(run_id)
-
-        for file in s3_fs:
-            s3_writer.promote_run(run_id)
+            for s2, f2 in s3_staging:
+                s3_writer.promote(s2, f2)
 
         duration = time.time() - start_time
         cdc_duration.observe(duration)
 
-        watermark_repo.update(new_watermark)
-        cdc_watermark_log_seconds.observe(
-            time.time() - start_time
-        )  # Log total time to update watermark
+        watermark_repo.update(df["updated_at"].max())
+        cdc_watermark_log_seconds.observe(time.time() - start_time)  # Log total time to update watermark
         conn.commit()
 
     except DataValidationError:
