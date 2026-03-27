@@ -2,7 +2,6 @@ from adlfs import AzureBlobFileSystem
 from week2_ingestion_production_framework.config.settings import cloud_settings
 
 
-
 class ADLSClient:
     def __init__(self):
         self.fs = AzureBlobFileSystem(
@@ -18,19 +17,19 @@ class ADLSClient:
         full_path = self._full_path(path)
         with self.fs.open(full_path, "wb") as f:
             f.write(data)
-    
+
     def read_file(self, path: str) -> bytes:
         full_path = self._full_path(path)
         with self.fs.open(full_path, "rb") as f:
             return f.read()
-        
+
     def delete_file(self, path: str) -> None:
         full_path = self._full_path(path)
         self.fs.rm(full_path)
 
     def file_exists(self, path: str) -> bool:
         return self.fs.exists(self._full_path(path))
-    
+
     def list_files(self, prefix: str):
         full_prefix = self._full_path(prefix)
         for full_path in self.fs.find(full_prefix):

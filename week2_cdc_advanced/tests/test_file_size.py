@@ -1,5 +1,6 @@
 import os
 
+
 def test_file_size(path: str) -> None:
     files = os.listdir(path)
 

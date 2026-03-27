@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 from week2_ingestion_production_framework.core.run_manager import RunManager
 from week2_ingestion_production_framework.core.client import ADLSClient
 
-from week2_ingestion_production_framework.metadata.metadata_manager import MetadataManager
-from week2_ingestion_production_framework.ingestion.extractor import Extractor
-from week2_ingestion_production_framework.ingestion.writer import Writer
-from week2_ingestion_production_framework.ingestion.promoter import Promoter
-from week2_ingestion_production_framework.quality.validations import validate_no_duplicates, validate_no_null_partition
+from week2_ingestion_production_framework.bronze.metadata.metadata_manager import MetadataManager
+from week2_ingestion_production_framework.bronze.ingestion.extractor import Extractor
+from week2_ingestion_production_framework.bronze.ingestion.writer import Writer
+from week2_ingestion_production_framework.bronze.ingestion.promoter import Promoter
+from week2_ingestion_production_framework.bronze.quality.validations import validate_no_duplicates, validate_no_null_partition
 from week2_ingestion_production_framework.core.connection import get_connection
 
 

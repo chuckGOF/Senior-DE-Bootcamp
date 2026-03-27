@@ -7,17 +7,19 @@ from week2_cdc_advanced.src.writers.adls_writer import ADLSWriter
 from week2_cdc_advanced.src.writers.s3_writer import S3Writer
 from week2_cdc_advanced.src.cdc.locks import acquire_file_lock
 from week2_cdc_advanced.src.cdc.validator import validate, DataValidationError
+
 # from week2_cdc_advanced.src.cdc.schme_manager import align_schema
 from week2_cdc_advanced.src.warehouse.connection import get_connection
 from week2_cdc_advanced.src.observability.metrics import (
-    cdc_runs, 
-    cdc_failures, 
-    cdc_duration, 
-    validation_failures, 
-    cdc_rows_processed_total, 
-    cdc_partitions_written_total, 
-    cdc_watermark_log_seconds
+    cdc_runs,
+    cdc_failures,
+    cdc_duration,
+    validation_failures,
+    cdc_rows_processed_total,
+    cdc_partitions_written_total,
+    cdc_watermark_log_seconds,
 )
+
 
 def run():
     start_time = time.time()
@@ -27,17 +29,18 @@ def run():
     watermark_repo = WatermarkRepository(conn, "sales_orders_cdc")
     cdc_watermark_log_seconds.observe(0)  # Log initial watermark read time
 
-
     lock = acquire_file_lock()
 
     try:
         last_wm = watermark_repo.acquire_lock()
-        cdc_watermark_log_seconds.observe(time.time() - start_time)  # Log watermark read time
+        cdc_watermark_log_seconds.observe(
+            time.time() - start_time
+        )  # Log watermark read time
 
         for chunk in extract_incremental(conn, last_wm):
             if chunk.empty:
                 return
-            
+
             validate(chunk)
 
             chunk["updated_date"] = chunk["updated_at"].dt.date
@@ -59,7 +62,7 @@ def run():
 
             cdc_rows_processed_total.inc(len(chunk))
             cdc_partitions_written_total.inc(len(partitions))
-            
+
             # Promote partitions after all writes succeed
             for s1, f1 in adls_staging:
                 adls_writer.promote(s1, f1)
@@ -70,8 +73,10 @@ def run():
         duration = time.time() - start_time
         cdc_duration.observe(duration)
 
-        watermark_repo.update(df["updated_at"].max())
-        cdc_watermark_log_seconds.observe(time.time() - start_time)  # Log total time to update watermark
+        watermark_repo.update(chunk["updated_at"].max())
+        cdc_watermark_log_seconds.observe(
+            time.time() - start_time
+        )  # Log total time to update watermark
         conn.commit()
 
     except DataValidationError:
