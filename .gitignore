@@ -40,3 +40,5 @@ dmypy.json
 .pytype/
 .pyre/
 .env
+.airflow/
+airflow/

@@ -1,8 +1,6 @@
-from week2_ingestion_production_framework.core.storage import StorageClient
-
-
-class SilverPromoter:
-    def __init__(self, storage: StorageClient) -> None:
+# ingestion/promoter.py
+class Promoter:
+    def __init__(self, storage):
         self.storage = storage
 
     def promote(self, staging_prefix: str):

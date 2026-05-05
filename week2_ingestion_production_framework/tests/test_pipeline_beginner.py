@@ -109,17 +109,41 @@ def test_pipeline_runs_all_checks_when_rows_exist(monkeypatch, patch_pipeline_ba
     calls = {"partition": 0, "dup": 0, "row": 0, "wm": 0}
 
     monkeypatch.setattr(rp, "Extractor", FakeExtractor)
-    monkeypatch.setattr(rp, "validate_no_null_partition", lambda df, col: calls.__setitem__("partition", calls["partition"] + 1))
-    monkeypatch.setattr(rp, "validate_no_duplicates", lambda df, key: calls.__setitem__("dup", calls["dup"] + 1))
-    monkeypatch.setattr(rp, "validate_row_count", lambda s, w: (calls.__setitem__("row", calls["row"] + 1), assert_eq((s, w), (2, 2))))
-    monkeypatch.setattr(rp, "validate_watermark_progression", lambda o, n: (calls.__setitem__("wm", calls["wm"] + 1), assert_eq((o, n), (100, 102))))
+    monkeypatch.setattr(
+        rp,
+        "validate_no_null_partition",
+        lambda df, col: calls.__setitem__("partition", calls["partition"] + 1),
+    )
+    monkeypatch.setattr(
+        rp,
+        "validate_no_duplicates",
+        lambda df, key: calls.__setitem__("dup", calls["dup"] + 1),
+    )
+    monkeypatch.setattr(
+        rp,
+        "validate_row_count",
+        lambda s, w: (
+            calls.__setitem__("row", calls["row"] + 1),
+            assert_eq((s, w), (2, 2)),
+        ),
+    )
+    monkeypatch.setattr(
+        rp,
+        "validate_watermark_progression",
+        lambda o, n: (
+            calls.__setitem__("wm", calls["wm"] + 1),
+            assert_eq((o, n), (100, 102)),
+        ),
+    )
 
     rp.run()
 
     assert calls == {"partition": 1, "dup": 1, "row": 1, "wm": 1}
 
 
-def test_pipeline_source_rows_zero_skips_watermark_check(monkeypatch, patch_pipeline_base):
+def test_pipeline_source_rows_zero_skips_watermark_check(
+    monkeypatch, patch_pipeline_base
+):
     class FakeExtractor:
         def __init__(self, conn):
             pass
@@ -132,8 +156,19 @@ def test_pipeline_source_rows_zero_skips_watermark_check(monkeypatch, patch_pipe
     monkeypatch.setattr(rp, "Extractor", FakeExtractor)
     monkeypatch.setattr(rp, "validate_no_null_partition", lambda df, col: None)
     monkeypatch.setattr(rp, "validate_no_duplicates", lambda df, key: None)
-    monkeypatch.setattr(rp, "validate_row_count", lambda s, w: (calls.__setitem__("row", calls["row"] + 1), assert_eq((s, w), (0, 0))))
-    monkeypatch.setattr(rp, "validate_watermark_progression", lambda o, n: calls.__setitem__("wm", calls["wm"] + 1))
+    monkeypatch.setattr(
+        rp,
+        "validate_row_count",
+        lambda s, w: (
+            calls.__setitem__("row", calls["row"] + 1),
+            assert_eq((s, w), (0, 0)),
+        ),
+    )
+    monkeypatch.setattr(
+        rp,
+        "validate_watermark_progression",
+        lambda o, n: calls.__setitem__("wm", calls["wm"] + 1),
+    )
 
     rp.run()
 
