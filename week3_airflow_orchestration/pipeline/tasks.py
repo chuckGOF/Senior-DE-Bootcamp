@@ -10,7 +10,7 @@ from week3_airflow_orchestration.pipeline.update_watermark import update_waterma
 
 
 def build_run_id(dag_run_id: str) -> str:
-    return dag_run_id.replace(':', '_')
+    return dag_run_id.replace(":", "_")
 
 
 def discover_tables() -> list[dict]:
@@ -19,13 +19,15 @@ def discover_tables() -> list[dict]:
 
     tables = []
     for row in metadata.get_tables():
-        tables.append({
-            'table_name': row.table_name,
-            'source_schema': row.source_schema,
-            'primary_key': row.primary_key,
-            'partition_column': row.partition_column,
-            'watermark_column': row.watermark_column
-        })
+        tables.append(
+            {
+                "table_name": row.table_name,
+                "source_schema": row.source_schema,
+                "primary_key": row.primary_key,
+                "partition_column": row.partition_column,
+                "watermark_column": row.watermark_column,
+            }
+        )
     return tables
 
 
@@ -35,12 +37,7 @@ def extract_stage(table_cfg: dict, pipeline_run_id: str) -> dict:
     extractor = Extractor(engine)
     storage = ADLSClient()
     return extract_table(
-        metadata,
-        extractor,
-        storage,
-        table_cfg,
-        pipeline_run_id,
-        chunk_size=5000
+        metadata, extractor, storage, table_cfg, pipeline_run_id, chunk_size=5000
     )
 
 

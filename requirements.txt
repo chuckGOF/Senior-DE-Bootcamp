@@ -9,6 +9,7 @@ black
 ruff
 python-json-logger
 prometheus-client
+pyspark
 psycopg2
 boto3
 adlfs

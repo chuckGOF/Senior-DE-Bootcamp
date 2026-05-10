@@ -6,7 +6,9 @@ class Extractor:
     def __init__(self, engine):
         self.engine = engine
 
-    def extract_incremental(self, schema, table, watermark_col, watermark, chunksize=5000):
+    def extract_incremental(
+        self, schema, table, watermark_col, watermark, chunksize=5000
+    ):
         count_query = text(
             f"""
             SELECT COUNT(*) AS total_rows

@@ -53,7 +53,9 @@ class MetadataManager:
         with self.engine.begin() as conn:
             conn.execute(query, {"watermark": watermark, "table": table})
 
-    def log_pipeline_run(self, run_id, table, start_time, end_time, rows, status, error=None):
+    def log_pipeline_run(
+        self, run_id, table, start_time, end_time, rows, status, error=None
+    ):
         query = text(
             """
             INSERT INTO metadata.pipeline_runs (

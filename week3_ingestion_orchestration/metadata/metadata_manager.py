@@ -20,12 +20,11 @@ class MetadataManager:
                 table_name = :table
                 AND active = 1
         """
-        )        
+        )
         with self.engine.connect() as conn:
             row = conn.execute(query, {"table": table}).mappings().first()
 
         return SimpleNamespace(**row) if row else None
-    
 
     def get_tables(self):
         query = text(

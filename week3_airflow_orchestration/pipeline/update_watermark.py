@@ -5,8 +5,8 @@ from week3_airflow_orchestration.pipeline.models import StagePayload
 
 
 def update_watermark(metadata: MetadataManager, payload: StagePayload) -> StagePayload:
-    if payload['source_rows'] > 0:
-        metadata.update_watermark(payload['table'], payload['max_watermark'])
+    if payload["source_rows"] > 0:
+        metadata.update_watermark(payload["table"], payload["max_watermark"])
 
     metadata.log_pipeline_run(
         run_id=payload["run_id"],
@@ -16,5 +16,5 @@ def update_watermark(metadata: MetadataManager, payload: StagePayload) -> StageP
         rows=payload.get("written_rows", 0),
         status="SUCCESS",
     )
-    
+
     return payload

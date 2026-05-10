@@ -2,42 +2,35 @@ import time
 from datetime import datetime
 from prometheus_client import Counter, Gauge, Histogram
 
+
 class PrometheusMetric:
     def __init__(self):
         self.pipeline_runs_total = Counter(
             "bronze_pipeline_runs_total",
             "Total bronze pipeline runs",
-            ['table', 'status']
+            ["table", "status"],
         )
 
         self.rows_processed_total = Counter(
-            "bronze_rows_processed_total",
-            "Total rows processed in bronze",
-            ['table']
+            "bronze_rows_processed_total", "Total rows processed in bronze", ["table"]
         )
 
         self.files_written_total = Counter(
-            "bronze_files_written_total",
-            "Total files written in bronze",
-            ['table']
+            "bronze_files_written_total", "Total files written in bronze", ["table"]
         )
 
         self.partitions_written_total = Counter(
             "bronze_partitions_written_total",
             "Total partitions written in bronze",
-            ['table']
+            ["table"],
         )
 
         self.watermark_latest = Gauge(
-            "bronze_watermark_latest",
-            "Lastest watermark seen by bronze",
-            ['table']
+            "bronze_watermark_latest", "Lastest watermark seen by bronze", ["table"]
         )
 
         self.run_duration_seconds = Histogram(
-            "bronze_run_duration_seconds",
-            "Bronze run duration in seconds",
-            ['table']
+            "bronze_run_duration_seconds", "Bronze run duration in seconds", ["table"]
         )
 
         self._start_times = {}
@@ -72,7 +65,7 @@ class PrometheusMetric:
         return float(watermark_value)
 
     def mark_success(self, table, watermark_value):
-        self.pipeline_runs_total.labels(table=table, status='success').inc()
+        self.pipeline_runs_total.labels(table=table, status="success").inc()
 
         wm = self._watermark_to_unix(watermark_value)
         if wm is not None:
@@ -80,7 +73,6 @@ class PrometheusMetric:
 
         self._observe_duration(table)
 
-
     def mark_failure(self, table):
-        self.pipeline_runs_total.labels(table=table, status='failed').inc()
+        self.pipeline_runs_total.labels(table=table, status="failed").inc()
         self._observe_duration(table)

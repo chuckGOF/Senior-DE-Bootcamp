@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+
 class CloudSettings(BaseSettings):
     S3_BUCKET: Optional[str] = None
     ADLS_ACCOUNT_NAME: Optional[str] = None

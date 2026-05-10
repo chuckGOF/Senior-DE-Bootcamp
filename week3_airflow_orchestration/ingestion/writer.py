@@ -10,7 +10,9 @@ class Writer:
         self.storage = storage
         self.base_path = base_path
 
-    def write_partition(self, df, table: str, partition_column: str, run_id: str) -> int:
+    def write_partition(
+        self, df, table: str, partition_column: str, run_id: str
+    ) -> int:
         files_written = 0
         groups = df.groupby(partition_column)
 
